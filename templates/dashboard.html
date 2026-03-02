@@ -1,0 +1,104 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Dashboard</title>
+    <style>
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        body { font-family: 'Segoe UI', Tahoma, sans-serif; background: #f0f2f5; min-height: 100vh; }
+        .navbar { background: #4a90d9; color: #fff; padding: 15px 30px; display: flex; justify-content: space-between; align-items: center; }
+        .navbar h2 { font-size: 20px; }
+        .navbar button { background: rgba(255,255,255,0.2); color: #fff; border: none; padding: 8px 20px; border-radius: 6px; cursor: pointer; font-size: 14px; }
+        .navbar button:hover { background: rgba(255,255,255,0.3); }
+        .content { max-width: 800px; margin: 40px auto; padding: 0 20px; }
+        .welcome-card { background: #fff; padding: 30px; border-radius: 10px; box-shadow: 0 2px 20px rgba(0,0,0,0.1); margin-bottom: 20px; }
+        .welcome-card h1 { color: #333; margin-bottom: 10px; }
+        .welcome-card p { color: #666; font-size: 16px; }
+        .stats { display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 20px; }
+        .stat-card { background: #fff; padding: 25px; border-radius: 10px; box-shadow: 0 2px 20px rgba(0,0,0,0.1); text-align: center; }
+        .stat-card .label { color: #888; font-size: 13px; text-transform: uppercase; letter-spacing: 1px; }
+        .stat-card .value { color: #333; font-size: 28px; font-weight: 700; margin-top: 8px; }
+        .error-screen { display: none; text-align: center; margin-top: 100px; }
+        .error-screen h2 { color: #721c24; margin-bottom: 15px; }
+        .error-screen a { color: #4a90d9; text-decoration: none; font-size: 18px; }
+    </style>
+</head>
+<body>
+    <div id="app">
+        <div class="navbar">
+            <h2>Dashboard</h2>
+            <button onclick="logout()">Logout</button>
+        </div>
+        <div class="content">
+            <div class="welcome-card">
+                <h1 id="welcomeMsg">Loading...</h1>
+                <p id="registeredAt"></p>
+            </div>
+            <div class="stats">
+                <div class="stat-card">
+                    <div class="label">Your Username</div>
+                    <div class="value" id="statUsername">-</div>
+                </div>
+                <div class="stat-card">
+                    <div class="label">Total Users</div>
+                    <div class="value" id="statUsers">-</div>
+                </div>
+                <div class="stat-card">
+                    <div class="label">Server Time</div>
+                    <div class="value" id="statTime" style="font-size:18px;">-</div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div id="errorScreen" class="error-screen">
+        <h2>You are not logged in</h2>
+        <a href="/login">Go to Login</a>
+    </div>
+
+    <script>
+        async function loadDashboard() {
+            const token = localStorage.getItem('token');
+            if (!token) {
+                showError();
+                return;
+            }
+
+            try {
+                const res = await fetch('/api/dashboard', {
+                    headers: { 'Authorization': 'Bearer ' + token }
+                });
+
+                if (!res.ok) {
+                    showError();
+                    return;
+                }
+
+                const json = await res.json();
+                const data = json.data;
+
+                document.getElementById('welcomeMsg').textContent = json.message;
+                document.getElementById('registeredAt').textContent = 'Member since: ' + new Date(data.registered_at).toLocaleDateString();
+                document.getElementById('statUsername').textContent = data.username;
+                document.getElementById('statUsers').textContent = data.total_users;
+                document.getElementById('statTime').textContent = new Date(data.server_time).toLocaleTimeString();
+            } catch (err) {
+                showError();
+            }
+        }
+
+        function showError() {
+            document.getElementById('app').style.display = 'none';
+            document.getElementById('errorScreen').style.display = 'block';
+        }
+
+        function logout() {
+            localStorage.removeItem('token');
+            window.location.href = '/login';
+        }
+
+        loadDashboard();
+    </script>
+</body>
+</html>
