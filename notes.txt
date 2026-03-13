@@ -1,0 +1,4 @@
+{"username": "user${__counter(,)}", "password": "password123"}
+
+cd "C:\Users\dexter james degayo\Desktop\jmmeter_project"
+"C:\Users\dexter james degayo\Desktop\apache-jmeter-5.6.3\apache-jmeter-5.6.3\bin\jmeter.bat" -g "C:\Users\dexter james degayo\Desktop\apache-jmeter-5.6.3\apache-jmeter-5.6.3\bin\reports\python-app.jtl" -o reports/
